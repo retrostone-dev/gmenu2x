@@ -92,6 +92,7 @@ Menu::Menu(GMenu2X& gmenu2x)
 
 				openPackagesFromDir((string) CARD_ROOT + "/" +
 							dptr->d_name + "/apps");
+				printf("%s/%s/apps\n", CARD_ROOT, dptr->d_name);
 			}
 			closedir(dirp);
 		}

@@ -45,11 +45,13 @@ class MediaMonitor;
 class Menu;
 
 #ifndef GMENU2X_SYSTEM_DIR
-#define GMENU2X_SYSTEM_DIR "/usr/share/gmenu2x"
+//#define GMENU2X_SYSTEM_DIR "/usr/share/gmenu2x"
+#define GMENU2X_SYSTEM_DIR "."
 #endif
 
 #ifndef LOG_FILE
-#define LOG_FILE "/var/log/gmenu2x.log"
+//#define LOG_FILE "/var/log/gmenu2x.log"
+#define LOG_FILE "./gmenu2x.log"
 #endif
 
 const int LOOP_DELAY = 30000;

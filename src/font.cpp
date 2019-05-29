@@ -12,7 +12,7 @@
 #include <vector>
 
 /* TODO: Let the theme choose the font and font size */
-#define TTF_FONT "/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed.ttf"
+#define TTF_FONT "./font.ttf"
 #define TTF_FONT_SIZE 12
 
 using namespace std;

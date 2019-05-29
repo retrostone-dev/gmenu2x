@@ -923,7 +923,9 @@ void GMenu2X::editLink() {
 		linkApp->setSelectorFilter(linkSelFilter);
 		linkApp->setSelectorDir(linkSelDir);
 		linkApp->setSelectorBrowser(linkSelBrowser);
+#ifdef ENABLE_CPUFREQ
 		linkApp->setClock(cpu.freqFromStr(freq));
+#endif
 		linkApp->save();
 
 		if (oldSection != newSection) {

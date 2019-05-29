@@ -82,7 +82,8 @@ void Surface::blit(SDL_Surface *destination, int x, int y, int w, int h, int a) 
 	dest.y = y;
 	if (a>0 && a!=raw->format->alpha)
 		SDL_SetAlpha(raw, SDL_SRCALPHA|SDL_RLEACCEL, a);
-	SDL_BlitSurface(raw, (w==0 || h==0) ? NULL : &src, destination, &dest);
+	
+	SDL_BlitSurface(raw, (w == 0 || h == 0) ? NULL : &src, destination, &dest);
 }
 void Surface::blit(Surface& destination, int x, int y, int w, int h, int a) const {
 	blit(destination.raw, x, y, w, h, a);
@@ -334,16 +335,19 @@ void OffscreenSurface::convertToDisplayFormat() {
 
 
 // OutputSurface:
+SDL_Surface* tooutput;
 
 unique_ptr<OutputSurface> OutputSurface::open(
 		int width, int height, int bitsPerPixel)
 {
 	SDL_ShowCursor(SDL_DISABLE);
-	SDL_Surface *raw = SDL_SetVideoMode(
-		width, height, bitsPerPixel, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	SDL_Surface *raw;
+	tooutput = SDL_SetVideoMode(0, 0, bitsPerPixel, SDL_HWSURFACE);
+	raw = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, bitsPerPixel, 0,0,0,0);
 	return unique_ptr<OutputSurface>(raw ? new OutputSurface(raw) : nullptr);
 }
 
 void OutputSurface::flip() {
-	SDL_Flip(raw);
+	SDL_SoftStretch(raw, NULL, tooutput, NULL);
+	SDL_Flip(tooutput);
 }

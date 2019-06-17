@@ -61,6 +61,8 @@ void Launcher::exec()
 		args.push_back(strdup(arg.c_str()));
 	}
 	args.push_back(nullptr);
+	
+	system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 
 	execvp(commandLine[0].c_str(), (char * const *)args.data());
 	WARNING("Failed to exec '%s': %s\n",

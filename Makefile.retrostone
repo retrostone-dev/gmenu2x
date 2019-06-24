@@ -7,10 +7,10 @@ CXX			= /opt/retrostone-toolchain/bin/arm-buildroot-linux-musleabihf-g++
 # change compilation / linking flag options
 
 F_OPTS		= -DHAVE_LIBOPK -DPLATFORM=\"retrostone\" -D_CARD_ROOT=\"/home\" -DUSE_GZIP -DUSE_LZO -I/usr/include/SDL -Ilibopk
-CC_OPTS		= -O2 -g -DLOG_LEVEL=4  $(F_OPTS)
+CC_OPTS		= -Ofast -flto -DLOG_LEVEL=0  $(F_OPTS)
 CFLAGS		= -I$(SDL_INCLUDE) $(CC_OPTS)
 CXXFLAGS	=$(CFLAGS) 
-LDFLAGS     = -Wl,--start-group -lc -lm -lstdc++ -lSDL -lasound -lpng -lSDL_ttf -lfreetype -lpng -lSDL_ttf -llzo2 -lz -Wl,--end-group
+LDFLAGS     = -flto -Wl,--start-group -lc -lm -lstdc++ -lSDL -lasound -lpng -lSDL_ttf -lfreetype -lbz2 -lpng -lSDL_ttf -llzo2 -lz -Wl,--end-group -s
 
 # Files to be compiled
 SRCDIR    = ./src ./libopk

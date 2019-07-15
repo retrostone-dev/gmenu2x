@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "background.h"
+#include "brightnessmanager.h"
 #include "cpu.h"
 #include "debug.h"
 #include "filedialog.h"
@@ -66,6 +67,21 @@
 //#include <pnd_discovery.h>
 #endif
 
+#ifdef PLATFORM_RS97
+//for soundcard
+#include <sys/ioctl.h>
+#include <linux/soundcard.h>
+#include <signal.h>
+#include <sys/statvfs.h>
+#include <errno.h>
+#include <fcntl.h> //for battery
+//for browsing the filesystem
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <dirent.h>
+#endif
+
 //for browsing the filesystem
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -94,6 +110,10 @@ const char *CARD_ROOT = "/media";
 
 static GMenu2X *app;
 static string gmenu2x_home;
+
+volatile uint32_t *memregs;
+int32_t memdev = 0;
+uint32_t soundDev;
 
 // Note: Keep this in sync with the enum!
 static const char *colorNames[NUM_COLORS] = {
@@ -140,6 +160,23 @@ static void set_handler(int signal, void (*handler)(int))
 	sigaction(signal, &sig, NULL);
 }
 
+void init_hardware()
+{
+#ifdef PLATFORM_RS97
+	/* Init memory registers, pretty much required for anthing RS-97 specific */
+	memdev = open("/dev/mem", O_RDWR);
+	if (memdev > 0) 
+	{
+		memregs = (uint32_t*)mmap(0, 0x20000, PROT_READ | PROT_WRITE, MAP_SHARED, memdev, 0x10000000);
+		if (memregs == MAP_FAILED) 
+		{
+			printf("Could not mmap hardware registers!\n");
+			close(memdev);
+		}
+	}
+#endif
+}
+
 int main(int /*argc*/, char * /*argv*/[]) {
 	INFO("---- GMenu2X starting ----\n");
 
@@ -160,6 +197,8 @@ int main(int /*argc*/, char * /*argv*/[]) {
 	}
 
 	DEBUG("Home path: %s.\n", gmenu2x_home.c_str());
+	
+	init_hardware();
 
 	GMenu2X::run();
 
@@ -196,6 +235,34 @@ GMenu2X::GMenu2X()
 
 	//load config data
 	readConfig();
+
+	brightnessmanager = std::make_unique<BrightnessManager>(this);
+	confInt["brightnessLevel"] = brightnessmanager->currentBrightness();
+
+#ifdef PLATFORM_RS97
+	char buf[32] = {0};
+	int32_t volume__;
+	soundDev = open("/dev/mixer", O_RDWR);
+	if (confInt["soundvol"] < 0 || confInt["soundvol"] == 0 || confInt["soundvol"] > 100)
+	{
+		volume__ = 100;
+	}
+	else
+	{
+		volume__ = confInt["soundvol"];
+	}
+	int32_t vol = (volume__ << 8) | volume__;
+	ioctl(soundDev, SOUND_MIXER_WRITE_VOLUME, &vol);
+	close(soundDev);
+	
+	int32_t bright = confInt["rs97brightness"];
+	if (bright < 0 || bright > 100 || bright == 0)
+	{
+		confInt["rs97brightness"] = 100;
+		bright = 100;
+	}
+	sprintf(buf, "echo %d > /proc/jz/lcd_backlight", bright);
+#endif
 
 	halfX = resX/2;
 	halfY = resY/2;
@@ -678,11 +745,31 @@ void GMenu2X::showSettings() {
 			*this, tr["Button repeat rate"],
 			tr["Set button repetitions per second"],
 			&confInt["buttonRepeatRate"], 0, 20)));
+#ifdef PLATFORM_RS97		
+	sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingInt(
+			*this, tr["Sound volume"],
+			tr["Set sound volume"],
+			&confInt["soundvol"], 0, 100)));
+	sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingInt(
+			*this, tr["Brightness level"],
+			tr["Brightness level"],
+			&confInt["rs97brightness"], 0, 100)));
+#else			
+	if (brightnessmanager->available()) {
+		sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingInt(
+				*this, tr["Brightness level"],
+				tr["Set the brightness level"],
+				&confInt["brightnessLevel"],
+				1, brightnessmanager->maxBrightness())));
+	}
+#endif
 
 	if (sd.exec()) {
 		powerSaver.setScreenTimeout(confInt["backlightTimeout"]);
 
 		input.repeatRateChanged();
+		if (brightnessmanager->available())
+			brightnessmanager->setBrightness(confInt["brightnessLevel"]);
 
 		if (lang == "English") lang = "";
 		if (lang != tr.lang()) {
@@ -692,6 +779,24 @@ void GMenu2X::showSettings() {
 
 		writeConfig();
 	}
+	
+	/* Apply Volume after exiting Settings menu */
+#ifdef PLATFORM_RS97
+	char buf[64];
+	int32_t volume__ = confInt["soundvol"];
+	int32_t vol = (volume__ << 8) | volume__;
+	ioctl(soundDev, SOUND_MIXER_WRITE_VOLUME, &vol);
+	close(soundDev);
+	
+	int32_t bright = confInt["rs97brightness"];
+	if (bright < 0 || bright > 100 || bright == 0)
+	{
+		confInt["rs97brightness"] = 100;
+		bright = 100;
+	}
+	sprintf(buf, "echo %d > /proc/jz/lcd_backlight", bright);
+	system(buf);
+#endif
 }
 
 void GMenu2X::skinMenu() {

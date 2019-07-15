@@ -6,6 +6,22 @@
 #include <cstdio>
 #include <sstream>
 
+extern volatile uint32_t *memregs;
+extern int32_t memdev;
+
+#ifdef PLATFORM_RS97
+static int32_t getBatteryStatus() 
+{
+	char buf[32] = "-1";
+	FILE *f = fopen("/proc/jz/battery", "r");
+	if (f) {
+		fgets(buf, sizeof(buf), f);
+		fclose(f);
+	}
+	return atol(buf);
+}
+#endif
+
 
 /**
  * Reads the current battery state and returns a number representing its level
@@ -66,6 +82,18 @@ static unsigned short getBatteryLevel()
 
 	return (voltage_now - voltage_min) * 6 / (voltage_max - voltage_min);
 #endif
+
+
+#ifdef PLATFORM_RS97
+	uint32_t val = getBatteryStatus();
+	if (val > 4000) return 5; // 100%
+    else if (val > 3900) return 4; // 80%
+    else if (val > 3800) return 3; // 60%
+    else if (val > 3730) return 2; // 40%
+    else if (val > 3600) return 1; // 20%
+    else return 0; // 0% :(
+#endif
+
 }
 
 Battery::Battery(SurfaceCollection& sc_)

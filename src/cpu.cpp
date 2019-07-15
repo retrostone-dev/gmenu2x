@@ -10,6 +10,9 @@
 #define SYSFS_CPUFREQ_SET SYSFS_CPUFREQ_DIR "/scaling_setspeed"
 #define SYSFS_CPUFREQ_CUR SYSFS_CPUFREQ_DIR "/scaling_cur_freq"
 
+extern volatile uint32_t *memregs;
+extern int32_t memdev;
+
 using namespace std;
 
 Cpu::Cpu() : defaultAppClock(0)
@@ -23,6 +26,14 @@ Cpu::Cpu() : defaultAppClock(0)
 		defaultAppClock = stoul(line) / 1000;
 
 		DEBUG("Running at %lu MHz\n", defaultAppClock);
+
+#ifdef PLATFORM_RS97
+		if (memdev > 0) 
+		{
+			uint32_t m = defaultAppClock / 6;
+			memregs[0x10 >> 2] = (m << 24) | 0x090520;
+		}
+#endif
 
 		fd1.close();
 	}
@@ -67,6 +78,13 @@ vector<string> Cpu::getFrequencies()
 
 void Cpu::setCpuSpeed(unsigned long mhz)
 {
+#ifdef PLATFORM_RS97
+	if (memdev > 0) 
+	{
+		uint32_t m = mhz / 6;
+		memregs[0x10 >> 2] = (m << 24) | 0x090520;
+	}
+#else
 	ofstream outf(SYSFS_CPUFREQ_SET);
 
 	if (outf.is_open()) {
@@ -76,4 +94,5 @@ void Cpu::setCpuSpeed(unsigned long mhz)
 
 		outf.close();
 	}
+#endif
 }

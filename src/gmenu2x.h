@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 
+class BrightnessManager;
 class Button;
 class Font;
 class HelpPopup;
@@ -76,6 +77,7 @@ private:
 #ifdef ENABLE_INOTIFY
 	MediaMonitor *monitor;
 #endif
+	std::unique_ptr<BrightnessManager> brightnessmanager;
 
 	std::unique_ptr<Launcher> toLaunch;
 

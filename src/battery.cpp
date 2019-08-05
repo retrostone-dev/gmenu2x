@@ -6,6 +6,12 @@
 #include <cstdio>
 #include <sstream>
 
+/*
+ * Gameblabla 15th July :
+ * - Added RS97 specific code. (PLATFORM_RS97)
+ * In this case, it's for the battery. The code is very basic though.
+*/
+
 extern volatile uint32_t *memregs;
 extern int32_t memdev;
 
@@ -18,6 +24,19 @@ static int32_t getBatteryStatus()
 		fgets(buf, sizeof(buf), f);
 		fclose(f);
 	}
+	return atol(buf);
+}
+#endif
+
+#if defined(PLATFORM_MIYOO)
+static int32_t getBatteryStatus() 
+{
+	char buf[32] = "-1";
+	FILE *f = fopen("/sys/devices/platform/soc/1c23400.battery/power_supply/miyoo-battery/voltage_now", "r");
+	if (f) {
+		fgets(buf, sizeof(buf), f);
+	}
+	fclose(f);
 	return atol(buf);
 }
 #endif
@@ -84,7 +103,7 @@ static unsigned short getBatteryLevel()
 #endif
 
 
-#ifdef PLATFORM_RS97
+#if defined(PLATFORM_RS97) || defined(PLATFORM_MIYOO)
 	uint32_t val = getBatteryStatus();
 	if (val > 4000) return 5; // 100%
     else if (val > 3900) return 4; // 80%

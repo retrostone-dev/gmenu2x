@@ -30,7 +30,7 @@ using std::endl;
 using std::string;
 
 SurfaceCollection::SurfaceCollection()
-	: skin("default")
+	: skin("Default")
 {
 }
 

@@ -18,6 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+/*
+ * Gameblabla 15th July :
+ * - Added RS97 specific code. (PLATFORM_RS97)
+ * This includes brightness, settings volume via OSS and etc...
+ * 
+ * TV out will be handled via another script.
+*/
+
 #include "background.h"
 #include "brightnessmanager.h"
 #include "cpu.h"
@@ -71,6 +79,20 @@
 //for soundcard
 #include <sys/ioctl.h>
 #include <linux/soundcard.h>
+#include <signal.h>
+#include <sys/statvfs.h>
+#include <errno.h>
+#include <fcntl.h> //for battery
+//for browsing the filesystem
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <dirent.h>
+#endif
+
+#ifdef PLATFORM_MIYOO
+//for soundcard
+#include <sys/ioctl.h>
 #include <signal.h>
 #include <sys/statvfs.h>
 #include <errno.h>
@@ -175,6 +197,20 @@ void init_hardware()
 		}
 	}
 #endif
+
+#if defined(PLATFORM_MIYOO)
+	memdev = open("/dev/mem", O_RDWR);
+	if (memdev > 0) 
+	{
+		memregs = (uint32_t*)mmap(0, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, memdev, 0x01c20000);
+		if (memregs == MAP_FAILED) 
+		{
+			printf("Could not mmap hardware registers!\n");
+			close(memdev);
+		}
+	}
+#endif
+
 }
 
 int main(int /*argc*/, char * /*argv*/[]) {
@@ -227,6 +263,38 @@ void GMenu2X::run() {
 	}
 }
 
+#if defined(PLATFORM_MIYOO)
+#define MIYOO_LID_FILE "/media/internal_sd/.backlight.conf"
+static int read_conf(const char *file)
+{
+  int i, fd;
+  int val = 5;
+  char buf[10]={0};
+  
+  fd = open(file, O_RDWR);
+  if(fd < 0){
+    val = 5;
+  }
+  else{
+    read(fd, buf, sizeof(buf));
+    for(i=0; i<strlen(buf); i++){
+      if(buf[i] == '\r'){
+        buf[i] = 0;
+      }
+      if(buf[i] == '\n'){
+        buf[i] = 0;
+      }
+      if(buf[i] == ' '){
+        buf[i] = 0;
+      }
+    }
+    val = atoi(buf);
+  }
+  close(fd);
+  return val;
+}
+#endif
+
 GMenu2X::GMenu2X()
 	: input(*this, powerSaver)
 {
@@ -262,6 +330,16 @@ GMenu2X::GMenu2X()
 		bright = 100;
 	}
 	sprintf(buf, "echo %d > /proc/jz/lcd_backlight", bright);
+#endif
+
+#if defined(PLATFORM_MIYOO)
+	char buf[34] = {0};
+	int lid = read_conf(MIYOO_LID_FILE);
+	if(lid == 0 || lid > 100 || lid < 0){
+		lid = 0;
+	}
+	sprintf(buf, "echo %d > /sys/devices/platform/backlight/backlight/backlight/brightness", lid);
+	system(buf);
 #endif
 
 	halfX = resX/2;
@@ -1004,10 +1082,12 @@ void GMenu2X::editLink() {
 	vector<string> cpufreqs = cpu.getFrequencies();
 	string freq = cpu.freqStr(linkApp->clock());
 
-	sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingMultiString(
-			*this, tr["Clock frequency"],
-			tr["CPU clock frequency for this link"],
-			&freq, &cpufreqs)));
+	if (!cpufreqs.empty()) {
+		sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingMultiString(
+				*this, tr["Clock frequency"],
+				tr["CPU clock frequency for this link"],
+				&freq, &cpufreqs)));
+	}
 #endif
 	if (!linkApp->isOpk()) {
 		sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingString(

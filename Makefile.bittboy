@@ -1,0 +1,35 @@
+PRGNAME     = gmenu2x
+
+# define regarding OS, which compiler to use
+CC			= /opt/bittboy-toolchain/bin/arm-buildroot-linux-musleabi-gcc
+CXX			= /opt/bittboy-toolchain/bin/arm-buildroot-linux-musleabi-g++
+
+# change compilation / linking flag options
+
+F_OPTS		= -DHAVE_LIBOPK -DPLATFORM=\"bittboy\" -D_CARD_ROOT=\"/media\" -DTARGET_MIYOO -DUSE_GZIP -DUSE_LZO -I/opt/bittboy-toolchain/arm-buildroot-linux-musleabi/sysroot/usr/include/SDL -Ilibopk
+CC_OPTS		= -O2 -flto -DLOG_LEVEL=4 $(F_OPTS)
+CFLAGS		= -I$(SDL_INCLUDE) $(CC_OPTS)
+CXXFLAGS	= $(CFLAGS) 
+LDFLAGS     = -flto -Wl,--start-group -lc -lm -lstdc++ -lSDL -lasound -lpng -lSDL_ttf -lfreetype -lbz2 -lpng -lSDL_ttf -llzo2 -lz -Wl,--end-group -s
+
+# Files to be compiled
+SRCDIR    = ./src ./libopk
+VPATH     = $(SRCDIR)
+SRC_C   = $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.c))
+SRC_CP   = $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.cpp))
+OBJ_C   = $(notdir $(patsubst %.c, %.o, $(SRC_C)))
+OBJ_CP   = $(notdir $(patsubst %.cpp, %.o, $(SRC_CP)))
+OBJS     = $(OBJ_C) $(OBJ_CP)
+
+# Rules to make executable
+$(PRGNAME)$(EXESUFFIX): $(OBJS)  
+	$(CC) $(CFLAGS) -o $(PRGNAME) $^ $(LDFLAGS)
+
+$(OBJ_C) : %.o : %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJ_CP) : %.o : %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	rm -f $(PRGNAME)$(EXESUFFIX) *.o

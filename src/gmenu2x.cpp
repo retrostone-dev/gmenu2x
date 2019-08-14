@@ -342,11 +342,6 @@ GMenu2X::GMenu2X()
 	system(buf);
 #endif
 
-	halfX = resX/2;
-	halfY = resY/2;
-	bottomBarIconY = resY-18;
-	bottomBarTextY = resY-10;
-
 	/* Do not clear the screen on exit.
 	 * This may require an SDL patch available at
 	 * https://github.com/mthuurne/opendingux-buildroot/blob
@@ -384,6 +379,10 @@ GMenu2X::GMenu2X()
 		ERROR("%ux%ux%u\n", resX, resY, confInt["videoBpp"]);
 		exit(EXIT_FAILURE);
 	};
+	
+	bottomBarIconY = height() - 18;
+	bottomBarTextY = height() - 10;
+
 
 	if (!fileExists(confStr["wallpaper"])) {
 		DEBUG("No wallpaper defined; we will take the default one.\n");
@@ -426,7 +425,7 @@ void GMenu2X::initBG() {
 	// Load wallpaper.
 	bg = OffscreenSurface::loadImage(confStr["wallpaper"]);
 	if (!bg) {
-		bg = OffscreenSurface::emptySurface(resX, resY);
+		bg = OffscreenSurface::emptySurface(width(), height());
 	}
 
 	drawTopBar(*bg);
@@ -455,7 +454,7 @@ void GMenu2X::initBG() {
 	manualX = cpuX;
 #endif
 
-	int serviceX = resX-38;
+	int serviceX = width() - 38;
 	if (usbnet) {
 		if (web) {
 			auto webserver = OffscreenSurface::loadImage(
@@ -566,7 +565,7 @@ void GMenu2X::viewLog() {
 }
 
 void GMenu2X::readConfig() {
-	string conffile = GMENU2X_SYSTEM_DIR "/gmenu2x.conf";
+	string conffile = getHome() + "/gmenu2x.conf";
 	readConfig(conffile);
 
 	conffile = getHome() + "/gmenu2x.conf";
@@ -969,7 +968,8 @@ void GMenu2X::setSkin(const string &skin, bool setWallpaper) {
 	if (menu != NULL) menu->skinUpdated();
 
 	//Selection png
-	useSelectionPng = sc.addSkinRes("imgs/selection.png", false) != NULL;
+	if (!skinConfInt["selectionBgUseColor"])
+		useSelectionPng = !!sc.addSkinRes("imgs/selection.png", false);
 
 	//font
 	initFont();
@@ -1169,34 +1169,36 @@ string GMenu2X::getDiskFree(const char *path) {
 	return df;
 }
 
-int GMenu2X::drawButton(Surface& s, const string &btn, const string &text, int x, int y) {
+int GMenu2X::drawButton(Surface& surface, const string &btn,
+			const string &text, int x, int y) {
 	int w = 0;
 	auto icon = sc["skin:imgs/buttons/" + btn + ".png"];
 	if (icon) {
-		if (y < 0) y = resY + y;
+		if (y < 0) y = height() + y;
 		w = icon->width();
-		icon->blit(s, x, y - 7);
+		icon->blit(surface, x, y - 7);
 		if (!text.empty()) {
 			w += 3;
-			w += font->write(
-					s, text, x + w, y, Font::HAlignLeft, Font::VAlignMiddle);
+			w += font->write(surface, text, x + w, y,
+					 Font::HAlignLeft, Font::VAlignMiddle);
 			w += 6;
 		}
 	}
 	return x + w;
 }
 
-int GMenu2X::drawButtonRight(Surface& s, const string &btn, const string &text, int x, int y) {
+int GMenu2X::drawButtonRight(Surface& surface, const string &btn,
+			     const string &text, int x, int y) {
 	int w = 0;
 	auto icon = sc["skin:imgs/buttons/" + btn + ".png"];
 	if (icon) {
-		if (y < 0) y = resY + y;
+		if (y < 0) y = height() + y;
 		w = icon->width();
-		icon->blit(s, x - w, y - 7);
+		icon->blit(surface, x - w, y - 7);
 		if (!text.empty()) {
 			w += 3;
-			w += font->write(
-					s, text, x - w, y, Font::HAlignRight, Font::VAlignMiddle);
+			w += font->write(surface, text, x - w, y,
+					 Font::HAlignRight, Font::VAlignMiddle);
 			w += 6;
 		}
 	}
@@ -1214,33 +1216,38 @@ void GMenu2X::drawScrollBar(uint pageSize, uint totalSize, uint pagePos) {
 	top += 1;
 	height -= 2;
 
-	s->rectangle(resX - 8, top, 7, height, skinConfColors[COLOR_SELECTION_BG]);
+	s->rectangle(width() - 8, top, 7, height,
+		     skinConfColors[COLOR_SELECTION_BG]);
 	top += 2;
 	height -= 4;
 
 	const uint barSize = max(height * pageSize / totalSize, 4u);
 	const uint barPos = (height - barSize) * pagePos / (totalSize - pageSize);
 
-	s->box(resX - 6, top + barPos, 3, barSize,
-			skinConfColors[COLOR_SELECTION_BG]);
+	s->box(width() - 6, top + barPos, 3, barSize,
+	       skinConfColors[COLOR_SELECTION_BG]);
 }
 
-void GMenu2X::drawTopBar(Surface& s) {
+void GMenu2X::drawTopBar(Surface& surface) {
 	Surface *bar = sc.skinRes("imgs/topbar.png", false);
 	if (bar) {
-		bar->blit(s, 0, 0);
+		for (unsigned int x = 0; x < width(); x++)
+			bar->blit(surface, x, 0);
 	} else {
 		const int h = skinConfInt["topBarHeight"];
-		s.box(0, 0, resX, h, skinConfColors[COLOR_TOP_BAR_BG]);
+		surface.box(0, 0, width(), h,
+			    skinConfColors[COLOR_TOP_BAR_BG]);
 	}
 }
 
-void GMenu2X::drawBottomBar(Surface& s) {
+void GMenu2X::drawBottomBar(Surface& surface) {
 	Surface *bar = sc.skinRes("imgs/bottombar.png", false);
 	if (bar) {
-		bar->blit(s, 0, resY-bar->height());
+	for (unsigned int x = 0; x < width(); x++)
+			bar->blit(surface, x, height() - bar->height());
 	} else {
 		const int h = skinConfInt["bottomBarHeight"];
-		s.box(0, resY - h, resX, h, skinConfColors[COLOR_BOTTOM_BAR_BG]);
+		surface.box(0, height() - h, width(), h,
+		      skinConfColors[COLOR_BOTTOM_BAR_BG]);
 	}
 }

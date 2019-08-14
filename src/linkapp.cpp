@@ -360,7 +360,7 @@ bool LinkApp::save() {
 
 void LinkApp::drawLaunch(Surface& s) {
 	//Darkened background
-	s.box(0, 0, gmenu2x.resX, gmenu2x.resY, 0,0,0,150);
+	s.box(0, 0, gmenu2x.width(), gmenu2x.height(), 0, 0, 0, 150);
 
 	string text = getLaunchMsg().empty()
 		? gmenu2x.tr.translate("Launching $1", getTitle().c_str(), nullptr)
@@ -371,19 +371,25 @@ void LinkApp::drawLaunch(Surface& s) {
 	int halfBoxW = boxW/2;
 
 	//outer box
-	s.box(gmenu2x.halfX-2-halfBoxW, gmenu2x.halfY-23, halfBoxW*2+5, 47, gmenu2x.skinConfColors[COLOR_MESSAGE_BOX_BG]);
+	s.box(gmenu2x.width() / 2 - 2 - halfBoxW,
+	      gmenu2x.height() / 2 - 23,
+	      halfBoxW * 2 + 5, 47,
+	      gmenu2x.skinConfColors[COLOR_MESSAGE_BOX_BG]);
 	//inner rectangle
-	s.rectangle(gmenu2x.halfX-halfBoxW, gmenu2x.halfY-21, boxW, 42, gmenu2x.skinConfColors[COLOR_MESSAGE_BOX_BORDER]);
+	s.rectangle(gmenu2x.width() / 2 - halfBoxW,
+		    gmenu2x.height() / 2 - 21, boxW,
+		    42, gmenu2x.skinConfColors[COLOR_MESSAGE_BOX_BORDER]);
 
-	int x = gmenu2x.halfX + 10 - halfBoxW;
+	int x = gmenu2x.width() / 2 + 10 - halfBoxW;
 	/*if (!getIcon().empty())
 		gmenu2x.sc[getIcon()]->blit(gmenu2x.s,x,104);
 	else
 		gmenu2x.sc["icons/generic.png"]->blit(gmenu2x.s,x,104);*/
 	if (iconSurface) {
-		iconSurface->blit(s, x, gmenu2x.halfY - 16);
+		iconSurface->blit(s, x, gmenu2x.height() / 2 - 16);
 	}
-	gmenu2x.font->write(s, text, x + 42, gmenu2x.halfY + 1, Font::HAlignLeft, Font::VAlignMiddle);
+	gmenu2x.font->write(s, text, x + 42, gmenu2x.height() / 2 + 1,
+		Font::HAlignLeft, Font::VAlignMiddle);
 }
 
 void LinkApp::start() {
@@ -438,7 +444,7 @@ void LinkApp::showManual() {
 		}
 		auto bg = OffscreenSurface::loadImage(gmenu2x.confStr["wallpaper"]);
 		if (!bg) {
-			bg = OffscreenSurface::emptySurface(gmenu2x.s->width(), gmenu2x.s->height());
+			bg = OffscreenSurface::emptySurface(gmenu2x.width(), gmenu2x.height());
 		}
 		bg->convertToDisplayFormat();
 
@@ -446,7 +452,7 @@ void LinkApp::showManual() {
 		string pageStatus;
 
 		bool close = false, repaint = true;
-		int page = 0, pagecount = pngman->width() / gmenu2x.resX;
+		int page = 0, pagecount = pngman->width() / gmenu2x.width();
 
 		ss << pagecount;
 		string spagecount;
@@ -457,7 +463,7 @@ void LinkApp::showManual() {
 
 			if (repaint) {
 				bg->blit(s, 0, 0);
-				pngman->blit(s, -page * gmenu2x.resX, 0);
+				pngman->blit(s, -page * gmenu2x.width(), 0);
 
 				gmenu2x.drawBottomBar(s);
 				int x = 5;
@@ -471,7 +477,11 @@ void LinkApp::showManual() {
 				ss << page+1;
 				ss >> pageStatus;
 				pageStatus = gmenu2x.tr["Page"]+": "+pageStatus+"/"+spagecount;
-				gmenu2x.font->write(s, pageStatus, gmenu2x.resX-10, gmenu2x.resY-10, Font::HAlignRight, Font::VAlignMiddle);
+				gmenu2x.font->write(s, pageStatus,
+						    gmenu2x.width() - 10,
+						    gmenu2x.height() - 10,
+						    Font::HAlignRight,
+						    Font::VAlignMiddle);
 
 				s.flip();
 				repaint = false;

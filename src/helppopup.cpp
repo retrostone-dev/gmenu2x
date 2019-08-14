@@ -31,11 +31,11 @@ void HelpPopup::paint(Surface& s) {
 	unsigned int posY = gmenu2x.getContentArea().first;
 
 	/* Center the popup */
-	posY += (gmenu2x.resY - posY - helpBoxHeight) / 2;
+	posY += (gmenu2x.height() - posY - helpBoxHeight) / 2;
 
-	s.box(10, posY, gmenu2x.resX - 20, helpBoxHeight + 4,
+	s.box(10, posY, gmenu2x.width() - 20, helpBoxHeight + 4,
 			gmenu2x.skinConfColors[COLOR_MESSAGE_BOX_BG]);
-	s.rectangle(12, posY + 2, gmenu2x.resX - 24, helpBoxHeight,
+	s.rectangle(12, posY + 2, gmenu2x.width() - 24, helpBoxHeight,
 			gmenu2x.skinConfColors[COLOR_MESSAGE_BOX_BORDER]);
 
 	posY += 10;

@@ -150,7 +150,7 @@ bool InputDialog::exec() {
 	drawTitleIcon(bg, icon, false);
 	writeTitle(bg, title);
 	writeSubTitle(bg, text);
-	buttonbox.paint(bg, 5, gmenu2x.resY - 1);
+	buttonbox.paint(bg, 5, gmenu2x.height() - 1);
 	bg.convertToDisplayFormat();
 
 	close = false;

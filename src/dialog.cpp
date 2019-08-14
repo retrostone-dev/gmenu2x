@@ -31,7 +31,8 @@ void Dialog::writeTitle(Surface& s, const std::string &title)
 
 void Dialog::writeSubTitle(Surface& s, const std::string &subtitle)
 {
-	std::string wrapped = gmenu2x.font->wordWrap(subtitle, gmenu2x.resX - 48);
+	std::string wrapped = gmenu2x.font->wordWrap(subtitle,
+						     gmenu2x.width() - 48);
 	gmenu2x.font->write(s, wrapped, 40,
 			gmenu2x.skinConfInt["topBarHeight"]
 				- gmenu2x.font->getTextHeight(wrapped),

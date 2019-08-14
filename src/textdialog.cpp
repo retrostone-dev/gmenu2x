@@ -30,7 +30,9 @@ using namespace std;
 TextDialog::TextDialog(GMenu2X& gmenu2x, const string &title, const string &description, const string &icon, const string &text)
 	: Dialog(gmenu2x)
 {
-	split(this->text, gmenu2x.font->wordWrap(text, (int) gmenu2x.resX - 15), "\n");
+	split(this->text,
+	      gmenu2x.font->wordWrap(text, gmenu2x.width() - 15),
+	      "\n");
 	this->title = title;
 	this->description = description;
 	this->icon = icon;
@@ -47,8 +49,8 @@ void TextDialog::drawText(const vector<string> &text, unsigned int y,
 		int rowY = y + (i - firstRow) * fontHeight;
 		if (line == "----") { // horizontal ruler
 			rowY += fontHeight / 2;
-			s.box(5, rowY, gmenu2x.resX - 16, 1, 255, 255, 255, 130);
-			s.box(5, rowY+1, gmenu2x.resX - 16, 1, 0, 0, 0, 130);
+			s.box(5, rowY, gmenu2x.width() - 16, 1, 255, 255, 255, 130);
+			s.box(5, rowY+1, gmenu2x.width() - 16, 1, 0, 0, 0, 130);
 		} else {
 			gmenu2x.font->write(s, line, 5, rowY);
 		}

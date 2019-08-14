@@ -89,7 +89,7 @@ bool WallpaperDialog::exec()
 		writeTitle(s, gmenu2x.tr["Wallpaper selection"]);
 		writeSubTitle(s, gmenu2x.tr["Select a wallpaper from the list"]);
 
-		buttonbox.paint(s, 5, gmenu2x.resY - 1);
+		buttonbox.paint(s, 5, gmenu2x.height() - 1);
 
 		//Selection
 		iY = selected - firstElement;

@@ -120,10 +120,13 @@ public:
 	 * ~/.gmenu2x */
 	static const std::string getHome();
 
+	const unsigned int width() const { return s->width(); }
+	const unsigned int height() const { return s->height(); }
+
 	/*
 	 * Variables needed for elements disposition
 	 */
-	uint resX, resY, halfX, halfY;
+	uint resX, resY;
 	uint bottomBarIconY, bottomBarTextY;
 	unsigned short cpuX; //!< Offset for displaying cpu clock information
 	unsigned short manualX; //!< Offset for displaying the manual indicator in the taskbar
@@ -134,7 +137,7 @@ public:
 	std::pair<unsigned int, unsigned int> getContentArea() {
 		const unsigned int top = skinConfInt["topBarHeight"];
 		const unsigned int bottom = skinConfInt["bottomBarHeight"];
-		return std::make_pair(top, resY - top - bottom);
+		return std::make_pair(top, s->height() - top - bottom);
 	}
 
 	PowerSaver powerSaver;

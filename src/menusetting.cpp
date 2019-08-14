@@ -52,5 +52,5 @@ void MenuSetting::drawSelected(int valueX, int y, int h)
 	s.box(0, y, valueX - 5, h,
 		gmenu2x.skinConfColors[COLOR_SELECTION_BG]);
 
-	buttonBox.paint(s, 5, gmenu2x.resY - 1);
+	buttonBox.paint(s, 5, gmenu2x.height() - 1);
 }

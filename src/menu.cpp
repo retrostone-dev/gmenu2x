@@ -99,7 +99,8 @@ Menu::Menu(GMenu2X& gmenu2x)
 	}
 #endif
 
-	btnContextMenu.setPosition(gmenu2x.resX - 38, gmenu2x.bottomBarIconY);
+	btnContextMenu.setPosition(gmenu2x.width() - 38,
+				   gmenu2x.bottomBarIconY);
 }
 
 Menu::~Menu()
@@ -143,8 +144,9 @@ void Menu::skinUpdated() {
 	ConfIntHash &skinConfInt = gmenu2x.skinConfInt;
 
 	//recalculate some coordinates based on the new element sizes
-	linkColumns = (gmenu2x.resX - 10) / skinConfInt["linkWidth"];
-	linkRows = (gmenu2x.resY - 35 - skinConfInt["topBarHeight"]) / skinConfInt["linkHeight"];
+	linkColumns = (gmenu2x.width() - 10) / skinConfInt["linkWidth"];
+	linkRows = (gmenu2x.height() - 35 - skinConfInt["topBarHeight"])
+		 / skinConfInt["linkHeight"];
 
 	//reload section icons
 	decltype(links)::size_type i = 0;
@@ -162,7 +164,7 @@ void Menu::skinUpdated() {
 void Menu::calcSectionRange(int &leftSection, int &rightSection) {
 	ConfIntHash &skinConfInt = gmenu2x.skinConfInt;
 	const int linkWidth = skinConfInt["linkWidth"];
-	const int screenWidth = gmenu2x.resX;
+	const int screenWidth = gmenu2x.width();
 	const int numSections = sections.size();
 	rightSection = min(
 			max(1, (screenWidth - 20 - linkWidth) / (2 * linkWidth)),

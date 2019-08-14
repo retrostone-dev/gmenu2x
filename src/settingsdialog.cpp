@@ -50,7 +50,7 @@ bool SettingsDialog::exec() {
 
 	const int topBarHeight = gmenu2x.skinConfInt["topBarHeight"];
 	uint rowHeight = gmenu2x.font->getLineSpacing() + 1; // gp2x=15+1 / pandora=19+1
-	uint numRows = (gmenu2x.resY - topBarHeight - 20) / rowHeight;
+	uint numRows = (gmenu2x.height() - topBarHeight - 20) / rowHeight;
 
 	uint maxNameWidth = 0;
 	for (auto it = settings.begin(); it != settings.end(); it++) {

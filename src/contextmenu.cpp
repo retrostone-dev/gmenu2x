@@ -89,8 +89,8 @@ ContextMenu::ContextMenu(GMenu2X &gmenu2x, Menu &menu)
 	w += 23;
 	const int h = (font.getLineSpacing() + 2) * options.size() + 8;
 	box = {
-		static_cast<Sint16>((gmenu2x.resX - w) / 2),
-		static_cast<Sint16>((gmenu2x.resY - h) / 2),
+		static_cast<Sint16>((gmenu2x.width() - w) / 2),
+		static_cast<Sint16>((gmenu2x.height() - h) / 2),
 		static_cast<Uint16>(w),
 		static_cast<Uint16>(h)
 	};
@@ -117,7 +117,8 @@ void ContextMenu::paint(Surface &s)
 	Font& font = *gmenu2x.font;
 
 	// Darken background.
-	s.box(0, 0, gmenu2x.resX, gmenu2x.resY, 0, 0, 0, fadeAlpha);
+	s.box(0, 0, gmenu2x.width(), gmenu2x.height(),
+	      0, 0, 0, fadeAlpha);
 
 	// Draw popup box.
 	s.box(box, gmenu2x.skinConfColors[COLOR_MESSAGE_BOX_BG]);

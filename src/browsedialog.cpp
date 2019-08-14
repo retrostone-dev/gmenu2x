@@ -58,12 +58,12 @@ bool BrowseDialog::exec()
 	const int topBarHeight = gmenu2x.skinConfInt["topBarHeight"];
 	rowHeight = gmenu2x.font->getLineSpacing() + 1; // gp2x=15+1 / pandora=19+1
 	rowHeight = constrain(rowHeight, 20, 40);
-	numRows = (gmenu2x.resY - topBarHeight - 20) / rowHeight;
+	numRows = (gmenu2x.height() - topBarHeight - 20) / rowHeight;
 	clipRect = (SDL_Rect) {
 		0,
 		static_cast<Sint16>(topBarHeight + 1),
-		static_cast<Uint16>(gmenu2x.resX - 9),
-		static_cast<Uint16>(gmenu2x.resY - topBarHeight - 25)
+		static_cast<Uint16>(gmenu2x.width() - 9),
+		static_cast<Uint16>(gmenu2x.height() - topBarHeight - 25)
 	};
 
 	selected = 0;
@@ -208,7 +208,7 @@ void BrowseDialog::paint()
 	drawTitleIcon(bg, "icons/explorer.png", true);
 	writeTitle(bg, title);
 	writeSubTitle(bg, subtitle);
-	buttonBox.paint(bg, 5, gmenu2x.resY - 1);
+	buttonBox.paint(bg, 5, gmenu2x.height() - 1);
 
 	bg.convertToDisplayFormat();
 	bg.blit(s, 0, 0);
@@ -225,7 +225,7 @@ void BrowseDialog::paint()
 	//Selection
 	const int topBarHeight = gmenu2x.skinConfInt["topBarHeight"];
 	iY = topBarHeight + 1 + (selected - firstElement) * rowHeight;
-	s.box(2, iY, gmenu2x.resX - 12, rowHeight - 1,
+	s.box(2, iY, gmenu2x.width() - 12, rowHeight - 1,
 			gmenu2x.skinConfColors[COLOR_SELECTION_BG]);
 
 	lastElement = firstElement + numRows;

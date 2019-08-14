@@ -1,5 +1,6 @@
 #include "font.h"
 
+#include "gmenu2x.h"
 #include "debug.h"
 #include "surface.h"
 #include "utilities.h"

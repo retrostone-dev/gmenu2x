@@ -210,7 +210,27 @@ bool InputManager::getButton(Button *button, bool wait) {
 				startTimer(joystick);
 			}
 		case SDL_JOYBUTTONDOWN:
-			is_js = true;
+			switch(event.jbutton.button)
+			{
+				case 1:
+					*button = CANCEL;
+				break;
+				case 2:
+					*button = ACCEPT;
+				break;
+				case 5:
+					*button = ALTRIGHT;
+				break;
+				case 4:
+					*button = ALTLEFT;
+				break;
+				case 8:
+					*button = MENU;
+				break;
+				case 9:
+					*button = SETTINGS;
+				break;
+			}
 			break;
 		case SDL_JOYAXISMOTION: {
 				is_js = true;

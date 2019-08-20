@@ -1046,6 +1046,17 @@ void GMenu2X::editLink() {
 	string diagIcon = linkApp->getIconPath();
 
 	SettingsDialog sd(*this, input, diagTitle, diagIcon);
+#ifdef ENABLE_CPUFREQ
+	vector<string> cpufreqs = cpu.getFrequencies();
+	string freq = cpu.freqStr(linkApp->clock());
+
+	if (!cpufreqs.empty()) {
+		sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingMultiString(
+				*this, tr["Clock frequency"],
+				tr["CPU clock frequency for this link"],
+				&freq, &cpufreqs)));
+	}
+#endif
 	if (!linkApp->isOpk()) {
 		sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingString(
 				*this, tr["Title"],
@@ -1078,17 +1089,6 @@ void GMenu2X::editLink() {
 				tr["Allow the selector to change directory"],
 				&linkSelBrowser)));
 	}
-#ifdef ENABLE_CPUFREQ
-	vector<string> cpufreqs = cpu.getFrequencies();
-	string freq = cpu.freqStr(linkApp->clock());
-
-	if (!cpufreqs.empty()) {
-		sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingMultiString(
-				*this, tr["Clock frequency"],
-				tr["CPU clock frequency for this link"],
-				&freq, &cpufreqs)));
-	}
-#endif
 	if (!linkApp->isOpk()) {
 		sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingString(
 				*this, tr["Selector Filter"],

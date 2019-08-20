@@ -11,10 +11,18 @@
  * In this case, it's for setting the CPU frequency.
 */
 
+
+#ifdef PLATFORM_RS97
+#define SYSFS_CPUFREQ_LIST "/mnt/int_sd/gmenu2x/frequencies"
+#define SYSFS_CPUFREQ_CUR "/mnt/int_sd/gmenu2x/cur_freq"
+#define SYSFS_CPUFREQ_SET SYSFS_CPUFREQ_DIR "/scaling_setspeed"
 #define SYSFS_CPUFREQ_DIR "/sys/devices/system/cpu/cpu0/cpufreq"
-#define SYSFS_CPUFREQ_LIST SYSFS_CPUFREQ_DIR "/scaling_available_frequencies"
+#else
+#define SYSFS_CPUFREQ_DIR "/sys/devices/system/cpu/cpu0/cpufreq"
 #define SYSFS_CPUFREQ_SET SYSFS_CPUFREQ_DIR "/scaling_setspeed"
 #define SYSFS_CPUFREQ_CUR SYSFS_CPUFREQ_DIR "/scaling_cur_freq"
+#define SYSFS_CPUFREQ_LIST SYSFS_CPUFREQ_DIR "/scaling_available_frequencies"
+#endif
 
 extern volatile uint32_t *memregs;
 extern int32_t memdev;
@@ -292,6 +300,29 @@ using namespace std;
 
 Cpu::Cpu() : defaultAppClock(0)
 {
+#if defined(PLATFORM_RS97)
+	if (memdev > 0) 
+	{
+		uint32_t m = 600 / 6;
+		memregs[0x10 >> 2] = (m << 24) | 0x090520;
+	}
+	defaultAppClock = 600;
+#elif defined(PLATFORM_MIYOO)
+	uint32_t x, v;
+	uint32_t total=sizeof(oc_table)/sizeof(uint32_t);
+
+	for(x=0; x<total; x++)
+	{
+		if((oc_table[x] >> 16) >= 533)
+		{
+			v = memregs[0];
+			v&= 0xffff0000;
+			v|= (oc_table[x] &  0x0000ffff);
+			memregs[0] = v;
+			break;
+		}
+	}
+#else
 	ifstream fd1(SYSFS_CPUFREQ_CUR, ios_base::in);
 
 	if (fd1.is_open()) {
@@ -302,17 +333,32 @@ Cpu::Cpu() : defaultAppClock(0)
 
 		DEBUG("Running at %lu MHz\n", defaultAppClock);
 
-#if defined(PLATFORM_RS97) || defined(PLATFORM_MIYOO)
-		if (memdev > 0) 
-		{
-			uint32_t m = defaultAppClock / 6;
-			memregs[0x10 >> 2] = (m << 24) | 0x090520;
-		}
-#endif
-
 		fd1.close();
 	}
+#endif
 
+#if defined(PLATFORM_RS97)
+	frequencies.push_back(600);
+	frequencies.push_back(612);
+	frequencies.push_back(624);
+	frequencies.push_back(636);
+	frequencies.push_back(648);
+	frequencies.push_back(672);
+	frequencies.push_back(688);
+	frequencies.push_back(702);
+	frequencies.push_back(718);
+	frequencies.push_back(724);
+	frequencies.push_back(732);
+	frequencies.push_back(740);
+	frequencies.push_back(748);
+	frequencies.push_back(756);
+#elif defined(PLATFORM_MIYOO)
+	frequencies.push_back(533);
+	frequencies.push_back(702);
+	frequencies.push_back(732);
+	frequencies.push_back(792);
+	frequencies.push_back(798);
+#else
 	ifstream fd2(SYSFS_CPUFREQ_LIST, ios_base::in);
 	vector<string> vect;
 
@@ -329,6 +375,7 @@ Cpu::Cpu() : defaultAppClock(0)
 		if (!it->empty())
 			frequencies.push_back(stoul(*it) / 1000);
 	}
+#endif
 }
 
 string Cpu::freqStr(unsigned long mhz)
@@ -359,6 +406,7 @@ void Cpu::setCpuSpeed(unsigned long mhz)
 		uint32_t m = mhz / 6;
 		memregs[0x10 >> 2] = (m << 24) | 0x090520;
 	}
+	DEBUG("Running app at %lu MHz\n", mhz);
 #elif defined(PLATFORM_MIYOO)
 	uint32_t x, v;
 	uint32_t total=sizeof(oc_table)/sizeof(uint32_t);
@@ -374,6 +422,7 @@ void Cpu::setCpuSpeed(unsigned long mhz)
 			break;
 		}
 	}
+	DEBUG("Running app at %lu MHz\n", mhz);
 #else
 	ofstream outf(SYSFS_CPUFREQ_SET);
 

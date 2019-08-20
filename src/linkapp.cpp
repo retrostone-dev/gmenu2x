@@ -607,7 +607,7 @@ unique_ptr<Launcher> LinkApp::prepareLaunch(const string &selectedFile) {
 	vector<string> commandLine;
 	if (isOpk()) {
 #ifdef HAVE_LIBOPK
-		commandLine = { "opkrun", "-m", metadata, opkFile};
+		commandLine = { "/usr/bin/opkrun", "-m", metadata, opkFile};
 		if (!params.empty()) {
 			commandLine.push_back(params);
 		}

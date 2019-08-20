@@ -1,0 +1,29 @@
+PRGNAME     = opkrun
+
+# define regarding OS, which compiler to use
+CC			= /opt/rs97-toolchain/bin/mipsel-linux-gcc
+
+# change compilation / linking flag options
+
+F_OPTS		= -DHAVE_LIBOPK -DPLATFORM=\"arcademini\" -D_CARD_ROOT=\"/mnt\" -I../libopk -DTARGET_RS97 -DUSE_GZIP 
+CC_OPTS		= -O2 -flto -DLOG_LEVEL=4 -I../libopk $(F_OPTS)
+CFLAGS		= $(CC_OPTS)
+CXXFLAGS	= $(CFLAGS) 
+LDFLAGS     = -flto -Wl,--start-group -lc -lm -lstdc++ -lz -Wl,--end-group -s
+
+# Files to be compiled
+SRCDIR    = . ../libopk
+VPATH     = $(SRCDIR)
+SRC_C   = $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.c))
+OBJ_C   = $(notdir $(patsubst %.c, %.o, $(SRC_C)))
+OBJS     = $(OBJ_C)
+
+# Rules to make executable
+$(PRGNAME)$(EXESUFFIX): $(OBJS)  
+	$(CC) $(CFLAGS) -o $(PRGNAME) $^ $(LDFLAGS)
+
+$(OBJ_C) : %.o : %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -f $(PRGNAME)$(EXESUFFIX) *.o

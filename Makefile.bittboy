@@ -6,7 +6,7 @@ CXX			= /opt/bittboy-toolchain/bin/arm-buildroot-linux-musleabi-g++
 
 # change compilation / linking flag options
 
-F_OPTS		= -DHAVE_LIBOPK -DPLATFORM_MIYOO -DPLATFORM=\"bittboy\" -D_CARD_ROOT=\"/\" -DTARGET_MIYOO -DUSE_GZIP -DUSE_LZO -I/opt/bittboy-toolchain/arm-buildroot-linux-musleabi/sysroot/usr/include/SDL -Ilibopk
+F_OPTS		= -DENABLE_CPUFREQ -DHAVE_LIBOPK -DPLATFORM_MIYOO -DPLATFORM=\"bittboy\" -D_CARD_ROOT=\"/\" -DTARGET_MIYOO -DUSE_GZIP -DUSE_LZO -I/opt/bittboy-toolchain/arm-buildroot-linux-musleabi/sysroot/usr/include/SDL -Ilibopk
 CC_OPTS		= -O2 -flto -DLOG_LEVEL=4 -march=armv5te -mtune=arm926ej-s $(F_OPTS)
 CFLAGS		= -I$(SDL_INCLUDE) $(CC_OPTS)
 CXXFLAGS	= $(CFLAGS) 

@@ -117,6 +117,8 @@
 
 using namespace std;
 
+int tts = 0;
+
 #ifndef DEFAULT_WALLPAPER_PATH
 #define DEFAULT_WALLPAPER_PATH \
   GMENU2X_SYSTEM_DIR "/skins/Default/wallpapers/default.png"
@@ -602,6 +604,9 @@ void GMenu2X::readConfig(string conffile) {
 	evalIntConf( confInt, "backlightTimeout", 15, 0,120 );
 	evalIntConf( confInt, "buttonRepeatRate", 10, 0, 20 );
 	evalIntConf( confInt, "videoBpp", 32, 16, 32 );
+	evalIntConf( confInt, "tts_selection", 0, 0,1 );
+	
+	tts = confInt["tts_selection"];
 
 	if (confStr["tvoutEncoding"] != "PAL") confStr["tvoutEncoding"] = "NTSC";
 	resX = constrain( confInt["resolutionX"], 240,1920 );
@@ -822,6 +827,10 @@ void GMenu2X::showSettings() {
 			*this, tr["Button repeat rate"],
 			tr["Set button repetitions per second"],
 			&confInt["buttonRepeatRate"], 0, 20)));
+	sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingBool(
+			*this, tr["Text to speech engine"],
+			tr["It talks when stuff is selected"],
+			&confInt["tts_selection"])));
 #ifdef PLATFORM_RS97		
 	sd.addSetting(unique_ptr<MenuSetting>(new MenuSettingInt(
 			*this, tr["Sound volume"],
@@ -854,6 +863,7 @@ void GMenu2X::showSettings() {
 			confStr["lang"] = lang;
 		}
 
+		tts = confInt["tts_selection"];
 		writeConfig();
 	}
 	

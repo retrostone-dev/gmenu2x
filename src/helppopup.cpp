@@ -12,6 +12,7 @@ HelpPopup::HelpPopup(GMenu2X& gmenu2x)
 }
 
 void HelpPopup::paint(Surface& s) {
+	extern void TTS(const char* text);
 	Font& font = *gmenu2x.font;
 	Translator &tr = gmenu2x.tr;
 
@@ -23,6 +24,8 @@ void HelpPopup::paint(Surface& s) {
 		"SELECT: Show contextual menu",
 		"START: Show options menu",
 	};
+	
+	TTS("Controls ! A button to Confirm selection. Bee button to show help menu. Left Shoulder and Right shoulder buttons to change section. Select to show contextual menu. Start for Options");
 
 	unsigned int nb_strings = sizeof(strings) / sizeof(strings[0]);
 	unsigned int spacing = font.getLineSpacing();

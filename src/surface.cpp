@@ -342,12 +342,12 @@ unique_ptr<OutputSurface> OutputSurface::open(
 {
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_Surface *raw;
-	tooutput = SDL_SetVideoMode(0, 0, bitsPerPixel, SDL_HWSURFACE);
+	tooutput = SDL_SetVideoMode(width, height, bitsPerPixel, SDL_HWSURFACE);
 	raw = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, bitsPerPixel, 0,0,0,0);
 	return unique_ptr<OutputSurface>(raw ? new OutputSurface(raw) : nullptr);
 }
 
 void OutputSurface::flip() {
-	SDL_SoftStretch(raw, NULL, tooutput, NULL);
+	SDL_BlitSurface(raw, NULL, tooutput, NULL);
 	SDL_Flip(tooutput);
 }

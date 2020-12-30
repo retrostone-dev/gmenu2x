@@ -39,6 +39,7 @@ WallpaperDialog::WallpaperDialog(GMenu2X& gmenu2x)
 
 bool WallpaperDialog::exec()
 {
+	extern void TTS(const char* text);
 	bool close = false, result = true;
 
 	FileLister fl;
@@ -70,6 +71,8 @@ bool WallpaperDialog::exec()
 
 	int fontheight = gmenu2x.font->getLineSpacing();
 	unsigned int nb_elements = height / fontheight;
+	
+	TTS(wallpapers[selected].c_str());
 
 	while (!close) {
 		OutputSurface& s = *gmenu2x.s;
@@ -118,22 +121,26 @@ bool WallpaperDialog::exec()
             case InputManager::UP:
                 if (selected == 0) selected = wallpapers.size()-1;
                 else selected -= 1;
+                TTS(wallpapers[selected].c_str());
                 break;
             case InputManager::ALTLEFT:
                 if ((int)(selected - nb_elements + 1) < 0)
 					selected = 0;
                 else
 					selected -= nb_elements - 1;
+					TTS(wallpapers[selected].c_str());
                 break;
             case InputManager::DOWN:
                 if (selected+1 >= wallpapers.size()) selected = 0;
                 else selected += 1;
+                TTS(wallpapers[selected].c_str());
                 break;
             case InputManager::ALTRIGHT:
                 if (selected + nb_elements - 1 >= wallpapers.size())
 					selected = wallpapers.size() - 1;
                 else
 					selected += nb_elements - 1;
+					TTS(wallpapers[selected].c_str());
                 break;
             case InputManager::ACCEPT:
                 close = true;

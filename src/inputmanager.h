@@ -40,8 +40,13 @@ enum EventCode {
 };
 
 #ifndef SDL_JOYSTICK_DISABLED
+#ifdef OGA
+#define AXIS_STATE_POSITIVE 1
+#define AXIS_STATE_NEGATIVE 0
+#else
 #define AXIS_STATE_POSITIVE 0
 #define AXIS_STATE_NEGATIVE 1
+#endif
 struct Joystick {
 	SDL_Joystick *joystick;
 	bool axisState[2][2];

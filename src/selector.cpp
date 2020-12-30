@@ -48,6 +48,7 @@ Selector::Selector(GMenu2X& gmenu2x, LinkApp& link, const string &selectorDir)
 }
 
 int Selector::exec(int startSelection) {
+	extern void TTS(const char* text);
 	const bool showDirectories = link.getSelectorBrowser();
 
 	FileLister fl;
@@ -97,6 +98,9 @@ int Selector::exec(int startSelection) {
 	unsigned int selected = constrain(startSelection, 0, fl.size() - 1);
 
 	bool close = false, result = true;
+	
+	TTS(fl[selected].c_str());
+	
 	while (!close) {
 		OutputSurface& s = *gmenu2x.s;
 
@@ -162,6 +166,7 @@ int Selector::exec(int startSelection) {
 			case InputManager::UP:
 				if (selected == 0) selected = fl.size() -1;
 				else selected -= 1;
+				TTS(fl[selected].c_str());
 				break;
 
 			case InputManager::ALTLEFT:
@@ -169,11 +174,13 @@ int Selector::exec(int startSelection) {
 					selected = 0;
 				else
 					selected -= nb_elements - 1;
+				TTS(fl[selected].c_str());
 				break;
 
 			case InputManager::DOWN:
 				if (selected+1>=fl.size()) selected = 0;
 				else selected += 1;
+				TTS(fl[selected].c_str());
 				break;
 
 			case InputManager::ALTRIGHT:
@@ -181,6 +188,7 @@ int Selector::exec(int startSelection) {
 					selected = fl.size() - 1;
 				else
 					selected += nb_elements - 1;
+				TTS(fl[selected].c_str());
 				break;
 
 			case InputManager::CANCEL:

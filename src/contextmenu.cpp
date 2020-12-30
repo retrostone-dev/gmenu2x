@@ -143,6 +143,7 @@ void ContextMenu::paint(Surface &s)
 }
 
 bool ContextMenu::handleButtonPress(InputManager::Button button) {
+	extern void TTS(const char* text);
 	switch (button) {
 		case InputManager::MENU:
 			dismiss();
@@ -150,10 +151,12 @@ bool ContextMenu::handleButtonPress(InputManager::Button button) {
 		case InputManager::UP:
 			selected--;
 			if (selected < 0) selected = options.size() - 1;
+			TTS(options[selected]->text.c_str());
 			break;
 		case InputManager::DOWN:
 			selected++;
 			if (selected >= static_cast<int>(options.size())) selected = 0;
+			TTS(options[selected]->text.c_str());
 			break;
 		case InputManager::ACCEPT:
 			options[selected]->action();

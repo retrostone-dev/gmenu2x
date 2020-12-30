@@ -182,6 +182,7 @@ bool Menu::runAnimations() {
 }
 
 void Menu::paint(Surface &s) {
+	extern void TTS(const char* text);
 	const uint width = s.width(), height = s.height();
 	Font &font = *gmenu2x.font;
 	SurfaceCollection &sc = gmenu2x.sc;
@@ -261,10 +262,13 @@ void Menu::paint(Surface &s) {
 		sectionLinks.at(i)->paint();
 	}
 
+	TTS(links[iSection].at(iLink)->getTitle().c_str());
+
 	if (selLink())
 		selLink()->paintDescription(width / 2, height - bottomBarHeight + 2);
 
 	LinkApp *linkApp = selLinkApp();
+	
 	if (linkApp && linkApp->isEditable()) {
 #ifdef ENABLE_CPUFREQ
 		font.write(s, gmenu2x.cpu.freqStr(linkApp->clock()),
@@ -279,6 +283,7 @@ void Menu::paint(Surface &s) {
 }
 
 bool Menu::handleButtonPress(InputManager::Button button) {
+	extern void TTS(const char* text);
 	switch (button) {
 		case InputManager::ACCEPT:
 			if (selLink() != NULL) selLink()->run();

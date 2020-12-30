@@ -42,6 +42,7 @@ SettingsDialog::SettingsDialog(
 }
 
 bool SettingsDialog::exec() {
+	extern void TTS(const char* text);
 	OffscreenSurface bg(*gmenu2x.bg);
 	bg.convertToDisplayFormat();
 
@@ -56,6 +57,8 @@ bool SettingsDialog::exec() {
 	for (auto it = settings.begin(); it != settings.end(); it++) {
 		maxNameWidth = max(maxNameWidth, (uint) gmenu2x.font->getTextWidth((*it)->getName()));
 	}
+	
+	TTS(settings[sel]->getName().c_str());
 
 	while (!close) {
 		OutputSurface& s = *gmenu2x.s;
@@ -102,10 +105,12 @@ bool SettingsDialog::exec() {
 					} else {
 						sel -= 1;
 					}
+					TTS(settings[sel]->getName().c_str());
 					break;
 				case InputManager::DOWN:
 					sel += 1;
 					if (sel>=settings.size()) sel = 0;
+					TTS(settings[sel]->getName().c_str());
 				default:
 					break;
 			}

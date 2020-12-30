@@ -10,6 +10,23 @@ using std::bind;
 using std::string;
 using std::unique_ptr;
 
+static char rm_tmp_chr[256];
+
+void TTS(const char* text)
+{
+	extern int tts;
+	char tmp_chr[256];
+	
+	if(strcmp(text, rm_tmp_chr) == 0) return;
+	
+	if (tts == 1)
+	{
+		snprintf(tmp_chr, sizeof(tmp_chr), "espeak '%s' &", text);
+		snprintf(rm_tmp_chr, sizeof(rm_tmp_chr), "%s", text);
+		system(tmp_chr);
+	}
+}
+
 BrowseDialog::BrowseDialog(
 		GMenu2X& gmenu2x,
 		const string &title, const string &subtitle)
@@ -227,6 +244,9 @@ void BrowseDialog::paint()
 	iY = topBarHeight + 1 + (selected - firstElement) * rowHeight;
 	s.box(2, iY, gmenu2x.width() - 12, rowHeight - 1,
 			gmenu2x.skinConfColors[COLOR_SELECTION_BG]);
+	
+	// Gameblabla
+	TTS(fl[selected].c_str());
 
 	lastElement = firstElement + numRows;
 	if (lastElement > fl.size())
@@ -248,6 +268,7 @@ void BrowseDialog::paint()
 			icon = iconFile;
 		}
 		icon->blit(s, 5, offsetY);
+		
 		gmenu2x.font->write(s, fl[i], 24, offsetY + rowHeight / 2,
 				Font::HAlignLeft, Font::VAlignMiddle);
 
